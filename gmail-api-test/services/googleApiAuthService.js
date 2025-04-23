@@ -3,6 +3,7 @@ const path = require("path");
 const process = require("process");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google } = require("googleapis");
+const { get } = require("http");
 
 //Define scopes
 const SCOPES = [
@@ -11,10 +12,10 @@ const SCOPES = [
 ];
 
 //Fetch and store token from files
-const TOKEN_PATH = path.join(process.cwd(), "./credentials/token.json");
+const TOKEN_PATH = path.join(process.cwd(), "../credentials/token.json");
 const CREDENTIALS_PATH = path.join(
   process.cwd(),
-  "./credentials/credentials.json"
+  "../credentials/credentials.json"
 );
 
 //Read previously authorized credentials from saved file
@@ -40,5 +41,32 @@ async function saveCredentials(client) {
     client_secret: key.client_secret,
     refresh_token: client.credentials.refresh_token,
   };
-  await fs.writeFile(TOKEN_PATH, payload);
+  //   await fs.writeFile(TOKEN_PATH, payload);
+  await fs.writeFile(TOKEN_PATH, JSON.stringify(payload));
 }
+
+//Authorize a client with credentials, then call the Gmail API
+async function authorize() {
+  let client = await loadSavedCredentialsIfExist();
+  if (client) {
+    return client;
+  }
+  client = await authenticate({
+    scopes: SCOPES,
+    keyfilePath: CREDENTIALS_PATH,
+  });
+  if (client.credentials) {
+    await saveCredentials(client);
+  }
+  return client;
+}
+
+//Get the Gmail API
+async function getGmailApi() {
+  const auth = await authorize();
+  console.log(auth.credentials.refresh_token);
+  //   const gmail = google.gmail({ version: "v1", auth });
+  //   return gmail;
+}
+
+getGmailApi();
