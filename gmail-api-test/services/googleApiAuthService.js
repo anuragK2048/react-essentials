@@ -12,10 +12,10 @@ const SCOPES = [
 ];
 
 //Fetch and store token from files
-const TOKEN_PATH = path.join(process.cwd(), "../credentials/token.json");
+const TOKEN_PATH = path.join(process.cwd(), "./credentials/token.json");
 const CREDENTIALS_PATH = path.join(
   process.cwd(),
-  "../credentials/credentials.json"
+  "./credentials/credentials.json"
 );
 
 //Read previously authorized credentials from saved file
@@ -65,8 +65,8 @@ async function authorize() {
 async function getGmailApi() {
   const auth = await authorize();
   console.log(auth.credentials.refresh_token);
-  //   const gmail = google.gmail({ version: "v1", auth });
-  //   return gmail;
+  const gmail = google.gmail({ version: "v1", auth });
+  return gmail;
 }
 
-getGmailApi();
+module.exports = getGmailApi;
